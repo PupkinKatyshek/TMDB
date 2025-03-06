@@ -1,0 +1,80 @@
+/* src/components/MovieCard.css */
+
+.ant-rate-star {
+  margin-inline-end: 5px !important;
+}
+
+.ant-card-body {
+  padding: 0px !important;
+}
+
+.card {
+  width: 454px;
+  height: 281px;
+  padding: 0 !important;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+}
+
+.card-content {
+  display: flex;
+}
+
+.card-image {
+  width: 183px;
+  height: auto;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 9px 0px 20px;
+  font-size: 12px;
+}
+
+.card-title h3 {
+  margin: 0px;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.card-rating {
+  margin: 0px;
+  padding-top: 5px;
+  padding-left: 20px;
+  font-size: 12px;
+}
+
+.card-genre {
+  margin: 0px;
+  padding-top: 5px;
+  padding-left: 20px;
+  font-size: 12px;
+}
+
+.card-description {
+  margin: 0px;
+  padding-left: 20px;
+  padding-top: 5px;
+  display: flex;
+  flex-shrink: 1;
+  width: 228px;
+  height: 129px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.stars-rating {
+  background-color: transparent;
+  padding: 5px 12px 12px 20px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
