@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Card, Rate, Progress, Tag } from "antd";
 import { format } from "date-fns";
-import "./MovieCard.css";
+import "./moviecard.css";
 
 const MovieCard = ({
   title,
   rating,
   releaseDate,
-  genre = [],
+  genre = "",
   description,
   imageUrl,
+  onRatingChange,
+  userRating,
 }) => {
   const progressPercent = (rating / 10) * 100;
 
@@ -20,20 +22,16 @@ const MovieCard = ({
     return "#66E900";
   };
 
-  const [userRating, setUserRating] = useState(0);
-
-  const handleRatingChange = (value) => {
-    setUserRating(value);
-  };
-
   const formattedReleaseDate = releaseDate
-    ? format(new Date(releaseDate), "MMMM dd,  yyyy")
+    ? format(new Date(releaseDate), "MMMM dd, yyyy")
     : "Дата не указана";
+
+  const genreArray = genre ? genre.split(", ") : [];
 
   return (
     <Card className="card" style={{ padding: 0 }}>
       <div className="card-content">
-        <img src={imageUrl} alt="Placeholder" className="card-image" />
+        <img src={imageUrl} alt={title} className="card-image" />
         <div className="card-info">
           <div className="card-title">
             <h3>{title}</h3>
@@ -41,13 +39,13 @@ const MovieCard = ({
               type="circle"
               percent={progressPercent}
               strokeColor={getProgressColor(progressPercent)}
-              format={() => `${rating}`}
+              format={() => `${rating.toFixed(1)}`}
               size={40}
             />
           </div>
           <p className="card-rating">{formattedReleaseDate}</p>
           <div className="card-genre">
-            {genre.map((genre, index) => (
+            {genreArray.map((genre, index) => (
               <Tag key={index} color="grey" style={{ marginBottom: "4px" }}>
                 {genre}
               </Tag>
@@ -55,8 +53,8 @@ const MovieCard = ({
           </div>
           <p className="card-description">{description}</p>
           <Rate
-            value={userRating}
-            onChange={handleRatingChange}
+            value={userRating || 0}
+            onChange={onRatingChange}
             count={10}
             className="stars-rating"
           />
