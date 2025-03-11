@@ -1,18 +1,21 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Card, Rate, Progress, Tag } from "antd";
 import { format } from "date-fns";
+import { GenresContext } from "../genrescontext";
 import "./moviecard.css";
 
 const MovieCard = ({
   title,
   rating,
   releaseDate,
-  genre = "",
+  genreIds,
   description,
   imageUrl,
   onRatingChange,
   userRating,
 }) => {
+  const { getMovieGenres } = useContext(GenresContext);
+
   const progressPercent = (rating / 10) * 100;
 
   const getProgressColor = (percent) => {
@@ -24,10 +27,10 @@ const MovieCard = ({
 
   const formattedReleaseDate = releaseDate
     ? format(new Date(releaseDate), "MMMM dd, yyyy")
-    : "Дата не указана";
+    : "No Release Date";
 
-  const genreArray = genre ? genre.split(", ") : [];
-
+  const genreArray = getMovieGenres(genreIds);
+  // console.log(genreArray);
   return (
     <Card className="card" style={{ padding: 0 }}>
       <div className="card-content">

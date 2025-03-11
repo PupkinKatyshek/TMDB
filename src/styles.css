@@ -7,7 +7,10 @@ body {
   background-color: transparent;
 }
 .searchform {
-  padding: 0px 30px 0px 30px;
+  margin: 0px auto;
+  margin-bottom: 20px;
+  display: flex;
+  width: 988px;
 }
 
 .app-header {

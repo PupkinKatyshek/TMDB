@@ -4,48 +4,69 @@ import { Layout, Tabs } from "antd";
 import MovieCard from "./components/moviecard/moviecard";
 import SearchForm from "./components/searchform/searchform";
 import CustomPagination from "./components/custompagination/custompagination";
+import { API_URL, API_KEY } from "./components/query.jsx";
+import { GenresProvider } from "./components/GenresContext.jsx";
 import "./styles.css";
+import "@ant-design/v5-patch-for-react-19";
 
 const { Header, Content, Footer } = Layout;
 
 const styles = {
   layout: { minHeight: "1147px" },
-  content: { padding: "24px", flex: 1 },
+  content: { padding: "0px 24px 24px 24px", flex: 1 },
   form: { marginBottom: "24px" },
 };
 
 const App = () => {
   const [movies, setMovies] = useState([]);
-  const [genres, setGenres] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
   const [isSearchMode, setIsSearchMode] = useState(true);
   const [ratedMovies, setRatedMovies] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
-  const API_KEY = import.meta.env.VITE_REACT_APP_API_KEY;
+  const fetchMovies = async (page = 1) => {
+    try {
+      const response = await axios.get(`${API_URL}movie/popular`, {
+        params: {
+          api_key: API_KEY,
+          page: page,
+        },
+      });
+      setMovies(response.data.results);
+      setTotalPages(response.data.total_pages);
+      setTotalResults(response.data.total_results);
+    } catch (error) {
+      console.error("Ошибка при запросе фильмов:", error);
+    }
+  };
+
+  const searchMoviesWithPagination = async (query, page = 1) => {
+    try {
+      const response = await axios.get(`${API_URL}search/movie`, {
+        params: {
+          api_key: API_KEY,
+          query: query,
+          include_adult: true,
+          page: page,
+        },
+      });
+      setMovies(response.data.results);
+      setTotalPages(response.data.total_pages);
+      setTotalResults(response.data.total_results);
+    } catch (error) {
+      console.error("Ошибка при поиске фильмов:", error);
+    }
+  };
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}movie/popular?api_key=${API_KEY}&page=${currentPage}`)
-      .then((response) => {
-        const allMovies = response.data.results;
-        setMovies(allMovies);
-        setTotalPages(100);
-      })
-      .catch((error) => {
-        console.error("Ошибка при запросе фильмов:", error);
-      });
-
-    axios
-      .get(`${API_URL}genre/movie/list?api_key=${API_KEY}`)
-      .then((response) => {
-        setGenres(response.data.genres);
-      })
-      .catch((error) => {
-        console.error("Ошибка при запросе жанров:", error);
-      });
-  }, [API_URL, API_KEY, currentPage]);
+    if (searchQuery) {
+      searchMoviesWithPagination(searchQuery, currentPage);
+    } else {
+      fetchMovies(currentPage);
+    }
+  }, [currentPage, searchQuery]);
 
   const handleRatingChange = (movieId, value) => {
     const movie = movies.find((m) => m.id === movieId);
@@ -68,21 +89,12 @@ const App = () => {
     setIsSearchMode(key === "search");
   };
 
-  const onFinish = (values) => {
-    console.log("Received values of form: ", values);
-  };
-
-  const getMovieGenres = (genreIds) => {
-    if (genres.length > 0 && genreIds) {
-      const filteredGenres = genres.filter((genre) =>
-        genreIds.includes(genre.id)
-      );
-      return filteredGenres
-        .slice(0, 2)
-        .map((genre) => genre.name)
-        .join(", ");
-    }
-    return "";
+  const onSearchComplete = (query, results, totalPages, totalResults) => {
+    setSearchQuery(query);
+    setMovies(results);
+    setTotalPages(totalPages);
+    setTotalResults(totalResults);
+    setCurrentPage(1);
   };
 
   const truncateText = (text) => {
@@ -105,51 +117,53 @@ const App = () => {
   };
 
   return (
-    <Layout style={styles.layout}>
-      <Header className="app-header">
-        <Tabs
-          defaultActiveKey="search"
-          onChange={handleTabChange}
-          items={[
-            {
-              key: "search",
-              label: "Search",
-            },
-            {
-              key: "rated",
-              label: "Rated",
-            },
-          ]}
-        />
-      </Header>
-      <Content style={styles.content}>
-        <SearchForm onFinish={onFinish} />
-        <div className="card-container">
-          {(isSearchMode ? movies : ratedMovies).map((movie) => (
-            <MovieCard
-              key={movie.id}
-              title={movie.title}
-              rating={movie.vote_average}
-              releaseDate={movie.release_date}
-              genre={getMovieGenres(movie.genre_ids)}
-              description={truncateText(movie.overview)}
-              imageUrl={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              onRatingChange={(value) => handleRatingChange(movie.id, value)}
-              userRating={ratedMovies.find((m) => m.id === movie.id)?.rating}
-            />
-          ))}
-        </div>
-      </Content>
-      {isSearchMode && (
-        <Footer className="app-footer">
-          <CustomPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onChange={handlePageChange}
+    <GenresProvider>
+      <Layout style={styles.layout}>
+        <Header className="app-header">
+          <Tabs
+            onChange={handleTabChange}
+            items={[
+              {
+                key: "search",
+                label: "Search",
+              },
+              {
+                key: "rated",
+                label: "Rated",
+              },
+            ]}
           />
-        </Footer>
-      )}
-    </Layout>
+        </Header>
+        <Content style={styles.content}>
+          <SearchForm onSearchComplete={onSearchComplete} />
+          <div className="card-container">
+            {(isSearchMode ? movies : ratedMovies).map((movie) => (
+              <MovieCard
+                key={movie.id}
+                title={movie.title}
+                rating={movie.vote_average}
+                releaseDate={movie.release_date}
+                genreIds={movie.genre_ids}
+                description={truncateText(movie.overview)}
+                imageUrl={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                onRatingChange={(value) => handleRatingChange(movie.id, value)}
+                userRating={ratedMovies.find((m) => m.id === movie.id)?.rating}
+              />
+            ))}
+          </div>
+        </Content>
+        {isSearchMode && (
+          <Footer className="app-footer">
+            <CustomPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalResults={totalResults}
+              onChange={handlePageChange}
+            />
+          </Footer>
+        )}
+      </Layout>
+    </GenresProvider>
   );
 };
 
