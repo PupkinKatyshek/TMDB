@@ -16,7 +16,7 @@ export const searchMovies = async (query, page = 1, onSuccess) => {
       },
     });
 
-    if (response.data.results.length === 0) {
+    if (response.data.results.length === 0 && query.length !== 0) {
       message.info({
         content: "Ничего не найдено.",
         duration: 3,
@@ -25,7 +25,7 @@ export const searchMovies = async (query, page = 1, onSuccess) => {
           textAlign: "center",
         },
       });
-      console.log("Хуету искал");
+      // console.log("Хуету искал");
     }
 
     onSuccess({
