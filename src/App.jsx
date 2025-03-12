@@ -5,7 +5,7 @@ import MovieCard from "./components/moviecard/moviecard";
 import SearchForm from "./components/searchform/searchform";
 import CustomPagination from "./components/custompagination/custompagination";
 import { API_URL, API_KEY } from "./components/query.jsx";
-import { GenresProvider } from "./components/GenresContext.jsx";
+import { GenresProvider } from "./components/genrescontext.jsx";
 import "./styles.css";
 import "@ant-design/v5-patch-for-react-19";
 
