@@ -37,7 +37,7 @@ const MovieCard = ({
         <img src={imageUrl} alt={title} className="card-image" />
         <div className="card-info">
           <div className="card-title">
-            <h3>{title}</h3>
+            <h3 title={title}>{title}</h3>
             <Progress
               type="circle"
               percent={progressPercent}

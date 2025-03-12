@@ -6,6 +6,7 @@ import SearchForm from "./components/searchform/searchform";
 import CustomPagination from "./components/custompagination/custompagination";
 import { API_URL, API_KEY } from "./components/query.jsx";
 import { GenresProvider } from "./components/genrescontext.jsx";
+import defaultImage from "/TMDB/src/assets/noimage.png";
 import "./styles.css";
 import "@ant-design/v5-patch-for-react-19";
 
@@ -98,6 +99,10 @@ const App = () => {
   };
 
   const truncateText = (text) => {
+    if (text.length == 0) {
+      return "Описание фильма отсутствует, посмотри и напиши сам.";
+    }
+
     if (text.length <= 190) {
       return text;
     }
@@ -135,7 +140,7 @@ const App = () => {
           />
         </Header>
         <Content style={styles.content}>
-          <SearchForm onSearchComplete={onSearchComplete} />
+          {isSearchMode && <SearchForm onSearchComplete={onSearchComplete} />}
           <div className="card-container">
             {(isSearchMode ? movies : ratedMovies).map((movie) => (
               <MovieCard
@@ -145,7 +150,11 @@ const App = () => {
                 releaseDate={movie.release_date}
                 genreIds={movie.genre_ids}
                 description={truncateText(movie.overview)}
-                imageUrl={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                imageUrl={
+                  movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : defaultImage
+                }
                 onRatingChange={(value) => handleRatingChange(movie.id, value)}
                 userRating={ratedMovies.find((m) => m.id === movie.id)?.rating}
               />
@@ -156,7 +165,7 @@ const App = () => {
           <Footer className="app-footer">
             <CustomPagination
               currentPage={currentPage}
-              totalPages={totalPages}
+              totalPages={totalPages > 500 ? 500 : totalPages}
               totalResults={totalResults}
               onChange={handlePageChange}
             />
