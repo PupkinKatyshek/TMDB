@@ -158,7 +158,7 @@ const App = () => {
 
       if (response.data.success) {
         console.log("Фильм успешно оценен!", value);
-        fetchRatedMovies(ratedCurrentPage); // Обновляем список оцененных фильмов
+        fetchRatedMovies(ratedCurrentPage);
       }
     } catch (error) {
       console.error("Ошибка при оценке фильма:", error);
