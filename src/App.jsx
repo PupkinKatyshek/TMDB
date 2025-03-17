@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import axios from "axios";
 import { Layout, Tabs } from "antd";
 import MovieCard from "./components/moviecard/moviecard";
@@ -59,40 +59,49 @@ const App = () => {
     }
   }, []);
 
+  const fetchRatedMovies = useCallback(
+    async (page = 1) => {
+      if (!guestSessionId) {
+        console.error("Гостевая сессия не создана.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `${API_URL}guest_session/${guestSessionId}/rated/movies`,
+          {
+            params: {
+              api_key: API_KEY,
+              page: page,
+            },
+          }
+        );
+
+        const ratedMovies = response.data.results.map((movie) => ({
+          ...movie,
+          rating: movie.rating,
+        }));
+
+        setRatedMovies(ratedMovies);
+        setRatedTotalPages(response.data.total_pages);
+      } catch (error) {
+        console.error("Ошибка при запросе оцененных фильмов:", error);
+      }
+    },
+    [guestSessionId]
+  );
+
   useEffect(() => {
     if (guestSessionId) {
       fetchRatedMovies(ratedCurrentPage);
     }
-  }, [guestSessionId, ratedCurrentPage]);
+  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
 
-  const fetchRatedMovies = async (page = 1) => {
-    if (!guestSessionId) {
-      console.error("Гостевая сессия не создана.");
-      return;
+  useEffect(() => {
+    if (guestSessionId) {
+      fetchRatedMovies(ratedCurrentPage);
     }
-
-    try {
-      const response = await axios.get(
-        `${API_URL}guest_session/${guestSessionId}/rated/movies`,
-        {
-          params: {
-            api_key: API_KEY,
-            page: page,
-          },
-        }
-      );
-
-      const ratedMovies = response.data.results.map((movie) => ({
-        ...movie,
-        rating: movie.rating,
-      }));
-
-      setRatedMovies(ratedMovies);
-      setRatedTotalPages(response.data.total_pages);
-    } catch (error) {
-      console.error("Ошибка при запросе оцененных фильмов:", error);
-    }
-  };
+  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
 
   const fetchMovies = async (page = 1) => {
     try {
@@ -109,6 +118,12 @@ const App = () => {
       console.error("Ошибка при запросе фильмов:", error);
     }
   };
+
+  useEffect(() => {
+    if (guestSessionId) {
+      fetchRatedMovies(ratedCurrentPage);
+    }
+  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
 
   const searchMoviesWithPagination = async (query, page = 1) => {
     try {
