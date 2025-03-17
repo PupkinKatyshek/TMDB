@@ -6,7 +6,7 @@ import SearchForm from "./components/searchform/searchform";
 import CustomPagination from "./components/custompagination/custompagination";
 import { API_URL, API_KEY } from "./components/query.jsx";
 import { GenresProvider } from "./components/genrescontext.jsx";
-import defaultImage from "/TMDB/src/assets/noimage.png";
+import defaultImage from "./assets/noimage.png";
 import "./styles.css";
 import "@ant-design/v5-patch-for-react-19";
 
