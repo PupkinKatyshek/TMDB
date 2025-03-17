@@ -115,8 +115,8 @@
   }
 
   .card-image {
-    width: auto;
-    height: 45%;
+    width: 43%;
+    height: 43%;
     padding: 4px 0px 0px 4px;
     border-radius: 8px;
     object-fit: contain;

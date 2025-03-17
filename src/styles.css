@@ -45,4 +45,15 @@ body {
   body {
     width: 400px;
   }
+  .card-container {
+    padding: 0px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1044px) {
+  .card-container {
+    padding: 0px;
+    justify-content: center;
+  }
 }
