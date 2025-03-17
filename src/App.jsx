@@ -25,7 +25,74 @@ const App = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [isSearchMode, setIsSearchMode] = useState(true);
   const [ratedMovies, setRatedMovies] = useState([]);
+  const [ratedCurrentPage, setRatedCurrentPage] = useState(1);
+  const [ratedTotalPages, setRatedTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [guestSessionId, setGuestSessionId] = useState(null);
+
+  useEffect(() => {
+    const fetchGuestSession = async () => {
+      try {
+        const response = await axios.get(
+          `${API_URL}authentication/guest_session/new`,
+          {
+            params: {
+              api_key: API_KEY,
+            },
+          }
+        );
+        setGuestSessionId(response.data.guest_session_id);
+        localStorage.setItem(
+          "tmdb_guest_session_id",
+          response.data.guest_session_id
+        );
+      } catch (error) {
+        console.error("Ошибка при создании гостевой сессии:", error);
+      }
+    };
+
+    const savedGuestSessionId = localStorage.getItem("tmdb_guest_session_id");
+    if (savedGuestSessionId) {
+      setGuestSessionId(savedGuestSessionId);
+    } else {
+      fetchGuestSession();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (guestSessionId) {
+      fetchRatedMovies(ratedCurrentPage);
+    }
+  }, [guestSessionId, ratedCurrentPage]);
+
+  const fetchRatedMovies = async (page = 1) => {
+    if (!guestSessionId) {
+      console.error("Гостевая сессия не создана.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `${API_URL}guest_session/${guestSessionId}/rated/movies`,
+        {
+          params: {
+            api_key: API_KEY,
+            page: page,
+          },
+        }
+      );
+
+      const ratedMovies = response.data.results.map((movie) => ({
+        ...movie,
+        rating: movie.rating,
+      }));
+
+      setRatedMovies(ratedMovies);
+      setRatedTotalPages(response.data.total_pages);
+    } catch (error) {
+      console.error("Ошибка при запросе оцененных фильмов:", error);
+    }
+  };
 
   const fetchMovies = async (page = 1) => {
     try {
@@ -69,20 +136,32 @@ const App = () => {
     }
   }, [currentPage, searchQuery]);
 
-  const handleRatingChange = (movieId, value) => {
-    const movie = movies.find((m) => m.id === movieId);
-    if (!movie) return;
+  const handleRatingChange = async (movieId, value) => {
+    if (!guestSessionId) {
+      console.error("Гостевая сессия не создана.");
+      return;
+    }
 
-    const ratedMovie = { ...movie, rating: value };
-
-    const isAlreadyRated = ratedMovies.some((m) => m.id === movieId);
-
-    if (isAlreadyRated) {
-      setRatedMovies((prev) =>
-        prev.map((m) => (m.id === movieId ? ratedMovie : m))
+    try {
+      const response = await axios.post(
+        `${API_URL}movie/${movieId}/rating`,
+        {
+          value: value,
+        },
+        {
+          params: {
+            api_key: API_KEY,
+            guest_session_id: guestSessionId,
+          },
+        }
       );
-    } else {
-      setRatedMovies((prev) => [...prev, ratedMovie]);
+
+      if (response.data.success) {
+        console.log("Фильм успешно оценен!", value);
+        fetchRatedMovies(ratedCurrentPage); // Обновляем список оцененных фильмов
+      }
+    } catch (error) {
+      console.error("Ошибка при оценке фильма:", error);
     }
   };
 
@@ -168,6 +247,19 @@ const App = () => {
               totalPages={totalPages > 500 ? 500 : totalPages}
               totalResults={totalResults}
               onChange={handlePageChange}
+            />
+          </Footer>
+        )}
+        {!isSearchMode && (
+          <Footer className="app-footer">
+            <CustomPagination
+              currentPage={ratedCurrentPage}
+              totalPages={ratedTotalPages > 500 ? 500 : ratedTotalPages}
+              totalResults={ratedMovies.length}
+              onChange={(page) => {
+                setRatedCurrentPage(page);
+                fetchRatedMovies(page);
+              }}
             />
           </Footer>
         )}

@@ -5,6 +5,32 @@ import "@ant-design/v5-patch-for-react-19";
 export const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 export const API_KEY = import.meta.env.VITE_REACT_APP_API_KEY;
 
+// Создание гостевой сессии
+export const createGuestSession = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}authentication/guest_session/new`,
+      {
+        params: {
+          api_key: API_KEY,
+        },
+      }
+    );
+
+    const guestSessionId = response.data.guest_session_id;
+    console.log("Guest Session ID:", guestSessionId);
+
+    // Сохраняем Guest Session ID в localStorage
+    localStorage.setItem("tmdb_guest_session_id", guestSessionId);
+
+    return guestSessionId;
+  } catch (error) {
+    console.error("Ошибка при создании гостевой сессии:", error);
+    message.error("Произошла ошибка при создании гостевой сессии.");
+  }
+};
+
+// Поиск фильмов
 export const searchMovies = async (query, page = 1, onSuccess) => {
   try {
     const response = await axios.get(`${API_URL}search/movie`, {
@@ -25,7 +51,6 @@ export const searchMovies = async (query, page = 1, onSuccess) => {
           textAlign: "center",
         },
       });
-      // console.log("Хуету искал");
     }
 
     onSuccess({
