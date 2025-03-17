@@ -91,18 +91,6 @@ const App = () => {
     [guestSessionId]
   );
 
-  useEffect(() => {
-    if (guestSessionId) {
-      fetchRatedMovies(ratedCurrentPage);
-    }
-  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
-
-  useEffect(() => {
-    if (guestSessionId) {
-      fetchRatedMovies(ratedCurrentPage);
-    }
-  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
-
   const fetchMovies = async (page = 1) => {
     try {
       const response = await axios.get(`${API_URL}movie/popular`, {
@@ -118,12 +106,6 @@ const App = () => {
       console.error("Ошибка при запросе фильмов:", error);
     }
   };
-
-  useEffect(() => {
-    if (guestSessionId) {
-      fetchRatedMovies(ratedCurrentPage);
-    }
-  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
 
   const searchMoviesWithPagination = async (query, page = 1) => {
     try {
@@ -157,6 +139,13 @@ const App = () => {
       return;
     }
 
+    // Локальное обновление состояния
+    setRatedMovies((prevRatedMovies) =>
+      prevRatedMovies.map((movie) =>
+        movie.id === movieId ? { ...movie, rating: value } : movie
+      )
+    );
+
     try {
       const response = await axios.post(
         `${API_URL}movie/${movieId}/rating`,
@@ -176,9 +165,20 @@ const App = () => {
         fetchRatedMovies(ratedCurrentPage);
       }
     } catch (error) {
-      console.error("Ошибка при оценке фильма:", error);
+      console.log("Ошибка при оценке фильма:", error);
+      setRatedMovies((prevRatedMovies) =>
+        prevRatedMovies.map((movie) =>
+          movie.id === movieId ? { ...movie, rating: movie.rating } : movie
+        )
+      );
     }
   };
+
+  useEffect(() => {
+    if (guestSessionId) {
+      fetchRatedMovies(ratedCurrentPage);
+    }
+  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
 
   const handleTabChange = (key) => {
     setIsSearchMode(key === "search");

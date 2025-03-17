@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Card, Rate, Progress, Tag } from "antd";
 import { format } from "date-fns";
 import { GenresContext } from "../genrescontext";
@@ -15,6 +15,7 @@ const MovieCard = ({
   userRating,
 }) => {
   const { getMovieGenres } = useContext(GenresContext);
+  const [localRating, setLocalRating] = useState(userRating || 0);
 
   const progressPercent = (rating / 10) * 100;
 
@@ -30,7 +31,12 @@ const MovieCard = ({
     : "No Release Date";
 
   const genreArray = getMovieGenres(genreIds);
-  // console.log(genreArray);
+
+  const handleRateChange = (value) => {
+    setLocalRating(value);
+    onRatingChange(value);
+  };
+
   return (
     <Card className="card" style={{ padding: 0 }}>
       <div className="card-content">
@@ -56,8 +62,8 @@ const MovieCard = ({
           </div>
           <p className="card-description">{description}</p>
           <Rate
-            value={userRating || 0}
-            onChange={onRatingChange}
+            value={localRating}
+            onChange={handleRateChange}
             count={10}
             className="stars-rating"
           />
