@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Card, Rate, Progress, Tag } from "antd";
 import { format } from "date-fns";
 import { GenresContext } from "../genrescontext";
@@ -17,6 +17,11 @@ const MovieCard = ({
   const { getMovieGenres } = useContext(GenresContext);
   const [localRating, setLocalRating] = useState(userRating || 0);
 
+  useEffect(() => {
+    console.log(`Initial userRating: ${userRating}`);
+    console.log(`Initial localRating: ${localRating}`);
+  }, [userRating, localRating]);
+
   const progressPercent = (rating / 10) * 100;
 
   const getProgressColor = (percent) => {
@@ -33,6 +38,7 @@ const MovieCard = ({
   const genreArray = getMovieGenres(genreIds);
 
   const handleRateChange = (value) => {
+    console.log(`Rating changed to: ${value}`);
     setLocalRating(value);
     onRatingChange(value);
   };

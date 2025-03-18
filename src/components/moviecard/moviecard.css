@@ -104,7 +104,7 @@
     display: flex;
     max-width: 387px;
     max-height: 245px;
-    padding: 0 !important;
+    padding: 10px 10px 0px 10px !important;
     box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
     overflow: hidden;
   }
@@ -115,8 +115,8 @@
   }
 
   .card-image {
-    width: 43%;
-    height: 43%;
+    width: 76px;
+    height: 106px;
     padding: 4px 0px 0px 4px;
     border-radius: 8px;
     object-fit: contain;
