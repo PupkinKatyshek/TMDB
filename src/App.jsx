@@ -85,6 +85,7 @@ const App = () => {
 
         setRatedMovies(ratedMovies);
         setRatedTotalPages(response.data.total_pages);
+        setRatedTotalResults(response.data.total_results);
       } catch (error) {
         console.error("Ошибка при запросе оцененных фильмов:", error);
       }
@@ -142,16 +143,13 @@ const App = () => {
       return;
     }
 
-    // Локальное обновление состояния
     setRatedMovies((prevRatedMovies) => {
       const movieIndex = prevRatedMovies.findIndex((m) => m.id === movieId);
       if (movieIndex !== -1) {
-        // Если фильм уже в списке оцененных, обновляем его рейтинг
         return prevRatedMovies.map((movie) =>
           movie.id === movieId ? { ...movie, rating: value } : movie
         );
       } else {
-        // Если фильма нет в списке оцененных, добавляем его
         const movieToAdd = movies.find((m) => m.id === movieId);
         return [...prevRatedMovies, { ...movieToAdd, rating: value }];
       }
@@ -176,7 +174,7 @@ const App = () => {
       }
     } catch (error) {
       console.log("Ошибка при оценке фильма:", error);
-      // Откатываем локальное изменение в случае ошибки
+
       setRatedMovies((prevRatedMovies) =>
         prevRatedMovies.map((movie) =>
           movie.id === movieId ? { ...movie, rating: movie.rating } : movie
@@ -188,7 +186,7 @@ const App = () => {
   const handleTabChange = (key) => {
     setIsSearchMode(key === "search");
     if (key === "rated") {
-      fetchRatedMovies(1); // Загружаем оцененные фильмы при переходе на вкладку "Rated"
+      fetchRatedMovies(1);
       setRatedCurrentPage(1);
     }
   };
