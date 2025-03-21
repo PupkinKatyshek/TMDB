@@ -18,8 +18,8 @@ const MovieCard = ({
   const [localRating, setLocalRating] = useState(userRating || 0);
 
   useEffect(() => {
-    console.log(`Initial userRating: ${userRating}`);
-    console.log(`Initial localRating: ${localRating}`);
+    // console.log(`Initial userRating: ${userRating}`);
+    // console.log(`Initial localRating: ${localRating}`);
   }, [userRating, localRating]);
 
   const progressPercent = (rating / 10) * 100;
@@ -38,7 +38,7 @@ const MovieCard = ({
   const genreArray = getMovieGenres(genreIds);
 
   const handleRateChange = (value) => {
-    console.log(`Rating changed to: ${value}`);
+    // console.log(`Rating changed to: ${value}`);
     setLocalRating(value);
     onRatingChange(value);
   };

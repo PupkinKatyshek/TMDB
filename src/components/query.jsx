@@ -20,7 +20,6 @@ export const createGuestSession = async () => {
     const guestSessionId = response.data.guest_session_id;
     console.log("Guest Session ID:", guestSessionId);
 
-    // Сохраняем Guest Session ID в localStorage
     localStorage.setItem("tmdb_guest_session_id", guestSessionId);
 
     return guestSessionId;

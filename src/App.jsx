@@ -27,6 +27,7 @@ const App = () => {
   const [ratedMovies, setRatedMovies] = useState([]);
   const [ratedCurrentPage, setRatedCurrentPage] = useState(1);
   const [ratedTotalPages, setRatedTotalPages] = useState(1);
+  const [ratedTotalResults, setRatedTotalResults] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [guestSessionId, setGuestSessionId] = useState(null);
 
@@ -102,6 +103,7 @@ const App = () => {
       setMovies(response.data.results);
       setTotalPages(response.data.total_pages);
       setTotalResults(response.data.total_results);
+      // console.log(response.data.total_pages, response.data.results);
     } catch (error) {
       console.error("Ошибка при запросе фильмов:", error);
     }
@@ -117,6 +119,7 @@ const App = () => {
           page: page,
         },
       });
+
       setMovies(response.data.results);
       setTotalPages(response.data.total_pages);
       setTotalResults(response.data.total_results);
@@ -140,11 +143,19 @@ const App = () => {
     }
 
     // Локальное обновление состояния
-    setRatedMovies((prevRatedMovies) =>
-      prevRatedMovies.map((movie) =>
-        movie.id === movieId ? { ...movie, rating: value } : movie
-      )
-    );
+    setRatedMovies((prevRatedMovies) => {
+      const movieIndex = prevRatedMovies.findIndex((m) => m.id === movieId);
+      if (movieIndex !== -1) {
+        // Если фильм уже в списке оцененных, обновляем его рейтинг
+        return prevRatedMovies.map((movie) =>
+          movie.id === movieId ? { ...movie, rating: value } : movie
+        );
+      } else {
+        // Если фильма нет в списке оцененных, добавляем его
+        const movieToAdd = movies.find((m) => m.id === movieId);
+        return [...prevRatedMovies, { ...movieToAdd, rating: value }];
+      }
+    });
 
     try {
       const response = await axios.post(
@@ -162,10 +173,10 @@ const App = () => {
 
       if (response.data.success) {
         console.log("Фильм успешно оценен!", value);
-        fetchRatedMovies(ratedCurrentPage);
       }
     } catch (error) {
       console.log("Ошибка при оценке фильма:", error);
+      // Откатываем локальное изменение в случае ошибки
       setRatedMovies((prevRatedMovies) =>
         prevRatedMovies.map((movie) =>
           movie.id === movieId ? { ...movie, rating: movie.rating } : movie
@@ -174,14 +185,12 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    if (guestSessionId) {
-      fetchRatedMovies(ratedCurrentPage);
-    }
-  }, [guestSessionId, ratedCurrentPage, fetchRatedMovies]);
-
   const handleTabChange = (key) => {
     setIsSearchMode(key === "search");
+    if (key === "rated") {
+      fetchRatedMovies(1); // Загружаем оцененные фильмы при переходе на вкладку "Rated"
+      setRatedCurrentPage(1);
+    }
   };
 
   const onSearchComplete = (query, results, totalPages, totalResults) => {
@@ -259,7 +268,7 @@ const App = () => {
           <Footer className="app-footer">
             <CustomPagination
               currentPage={currentPage}
-              totalPages={totalPages > 500 ? 500 : totalPages}
+              totalPages={totalPages}
               totalResults={totalResults}
               onChange={handlePageChange}
             />
@@ -269,8 +278,8 @@ const App = () => {
           <Footer className="app-footer">
             <CustomPagination
               currentPage={ratedCurrentPage}
-              totalPages={ratedTotalPages > 500 ? 500 : ratedTotalPages}
-              totalResults={ratedMovies.length}
+              totalPages={ratedTotalPages}
+              totalResults={ratedTotalResults}
               onChange={(page) => {
                 setRatedCurrentPage(page);
                 fetchRatedMovies(page);
